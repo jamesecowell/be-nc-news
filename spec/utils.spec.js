@@ -20,6 +20,12 @@ describe('formatDates', () => {
     formatDates(list);
     expect(list).to.eql(control);
   });
+  it('adds a timestamp converted to JS date object', () => {
+    const list = [{ objA: 1 }];
+    const time = new Date();
+    const test = formatDates(list);
+    expect(test[0].created_at).to.eql(time);
+  });
   it('each item in array has a timestamp converted to JS date object', () => {
     const list = [{ objA: 1 }, { objB: 2 }, { objC: 3 }];
     const time = new Date();
