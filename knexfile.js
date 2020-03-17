@@ -12,19 +12,33 @@ const baseConfig = {
 
 const customConfig = {
   development: {
+    client: 'pg',
     connection: {
       database: 'nc_news'
       // user,
       // password
+    },
+    migrations: {
+      directory: './db/migrations'
+    },
+    seeds: {
+      directory: './db/seeds'
     }
   },
   test: {
+    client: 'pg',
     connection: {
       database: 'nc_news_test'
       // user,
       // password
+    },
+    migrations: {
+      directory: './db/migrations'
+    },
+    seeds: {
+      directory: './db/seeds'
     }
   }
 };
 
-module.exports = { ...customConfig[ENV], ...baseConfig };
+module.exports = customConfig[ENV];
