@@ -21,7 +21,7 @@ describe('/api', () => {
         });
     });
   });
-  describe('/users', () => {
+  describe.only('/users', () => {
     it('GET with a username parameter returns 200 and the requested user', () => {
       return request(app)
         .get('/api/users/butter_bridge')
@@ -33,6 +33,14 @@ describe('/api', () => {
               'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg',
             name: 'jonny'
           });
+        });
+    });
+    it('GET with an invalid username parameter returns 404 and error message', () => {
+      return request(app)
+        .get('/api/users/notauser')
+        .expect(404)
+        .then(res => {
+          expect(res.body).to.eql({ msg: 'User not found' });
         });
     });
   });
