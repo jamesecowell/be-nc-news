@@ -5,12 +5,24 @@ exports.formatDates = list => {
   });
 };
 
-exports.makeRefObj = (list, firstColumn, secondColumn) => {
+exports.makeRefObj = list => {
   let refObj = {};
   list.forEach(item => {
-    refObj[item[firstColumn]] = item[secondColumn];
+    refObj[item.title] = item.article_id;
   });
   return refObj;
 };
 
-exports.formatComments = (comments, articleRef) => {};
+exports.formatComments = (comments, articleRef) => {
+  if (comments.length) {
+    return comments.map(comment => {
+      let formComm = {};
+      formComm.body = comment.body;
+      formComm.article_id = articleRef[comment.belongs_to];
+      formComm.author = comment.created_by;
+      formComm.votes = comment.votes;
+      formComm.created_at = new Date(comment.created_at);
+      return formComm;
+    });
+  } else return [];
+};

@@ -25,6 +25,7 @@ exports.seed = function(knex) {
     
           Your comment insertions will depend on information from the seeded articles, so make sure to return the data after it's been seeded.
           */
+          console.log(articleData);
           return knex('articles').insert(formatDates(articleData));
         })
         .then(articleRows => {
@@ -36,7 +37,7 @@ exports.seed = function(knex) {
           
           You will need to write and test the provided makeRefObj and formatComments utility functions to be able insert your comment data.
           */
-
+          console.log(articleRows);
           const articleRef = makeRefObj(articleRows);
           const formattedComments = formatComments(commentData, articleRef);
           return knex('comments').insert(formattedComments);

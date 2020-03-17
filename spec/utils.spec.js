@@ -85,11 +85,17 @@ describe('formatDates', () => {
   });
 });
 
-describe.only('makeRefObj', () => {
+describe('makeRefObj', () => {
   it('returns an object', () => {
     const list = [{ article_id: 1, title: 'A' }];
     const test = makeRefObj(list);
     expect(test).to.be.an('object');
+  });
+  it('does not mutate the original array ', () => {
+    const list = [{ article_id: 1, title: 'A' }];
+    const control = [{ article_id: 1, title: 'A' }];
+    makeRefObj(list);
+    expect(list).to.eql(control);
   });
   it('returns a reference object for an array containing a single object', () => {
     const list = [{ article_id: 1, title: 'A' }];
@@ -102,10 +108,78 @@ describe.only('makeRefObj', () => {
       { article_id: 2, title: 'B' },
       { article_id: 3, title: 'C' }
     ];
-    const test = makeRefObj(list, 'title', 'article_id');
+    const test = makeRefObj(list);
     const expected = { A: 1, B: 2, C: 3 };
     expect(test).to.eql(expected);
   });
 });
 
-describe('formatComments', () => {});
+describe('formatComments', () => {
+  it('returns an empty array when passed', () => {
+    expect(formatComments([])).to.eql([]);
+  });
+  it('takes an array of objects and returns an array', () => {
+    const articleRef = { A: 9 };
+    const comments = [
+      {
+        body:
+          "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        belongs_to: 'A',
+        created_by: 'butter_bridge',
+        votes: 16,
+        created_at: 1511354163389
+      }
+    ];
+    const test = formatComments(comments, articleRef);
+    expect(test).to.be.an('array');
+  });
+  it('does not mutate the original array', () => {
+    const articleRef = { A: 9 };
+    const comments = [
+      {
+        body:
+          "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        belongs_to: 'A',
+        created_by: 'butter_bridge',
+        votes: 16,
+        created_at: 1511354163389
+      }
+    ];
+    const control = [
+      {
+        body:
+          "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        belongs_to: 'A',
+        created_by: 'butter_bridge',
+        votes: 16,
+        created_at: 1511354163389
+      }
+    ];
+    formatComments(comments, articleRef);
+    expect(comments).to.eql(control);
+  });
+  it('returns a single formatted comment with referenced keys', () => {
+    const comments = [
+      {
+        body:
+          "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        belongs_to: 'A',
+        created_by: 'butter_bridge',
+        votes: 16,
+        created_at: 1511354163389
+      }
+    ];
+    const articleRef = { A: 9 };
+    const test = formatComments(comments, articleRef);
+    expect(test).to.eql([
+      {
+        body:
+          "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        article_id: 9,
+        author: 'butter_bridge',
+        votes: 16,
+        created_at: new Date(1511354163389)
+      }
+    ]);
+  });
+});
