@@ -15,16 +15,18 @@ exports.seed = function(knex) {
     .rollback()
     .then(() => knex.migrate.latest())
     .then(() => {
-      return Promise.all([topicsInsertions, usersInsertions])
-        .then(() => {
-          return knex('articles').insert(formatDates(articleData));
-        })
-        .then(articleRows => {
-          const articleRef = makeRefObj(articleRows.rows);
-          const formattedComments = formatComments(commentData, articleRef);
-          return knex('comments')
-            .insert(formattedComments)
-            .returning('*');
-        });
+      return Promise.all([topicsInsertions, usersInsertions]);
+    })
+    .then(() => {
+      return knex('articles')
+        .insert(formatDates(articleData))
+        .returning('*');
+    })
+    .then(articleRows => {
+      const articleRef = makeRefObj(articleRows);
+      const formattedComments = formatComments(commentData, articleRef);
+      return knex('comments')
+        .insert(formattedComments)
+        .returning('*');
     });
 };

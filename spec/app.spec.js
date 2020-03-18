@@ -8,6 +8,7 @@ const knex = require('../db/connection');
 describe('/api', () => {
   beforeEach(() => knex.seed.run());
   after(() => knex.destroy());
+
   describe('/topics', () => {
     it('GET returns status 200 and topics', () => {
       return request(app)
@@ -21,7 +22,8 @@ describe('/api', () => {
         });
     });
   });
-  describe.only('/users', () => {
+
+  describe('/users', () => {
     it('GET with a username parameter returns 200 and the requested user', () => {
       return request(app)
         .get('/api/users/butter_bridge')
@@ -41,6 +43,26 @@ describe('/api', () => {
         .expect(404)
         .then(res => {
           expect(res.body).to.eql({ msg: 'User not found' });
+        });
+    });
+  });
+
+  describe('/articles', () => {
+    it('GET with an article_id paramter returns 200 and the requested article', () => {
+      return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(res => {
+          expect(res.body).to.eql({
+            author: 'butter_bridge',
+            title: 'Living in the shadow of a great man',
+            article_id: 1,
+            body: 'I find this existence challenging',
+            topic: 'mitch',
+            created_at: '2018-11-15T12:21:54.171Z',
+            votes: 100,
+            comment_count: '13'
+          });
         });
     });
   });
