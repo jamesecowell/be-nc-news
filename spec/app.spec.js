@@ -65,5 +65,31 @@ describe('/api', () => {
           });
         });
     });
+    it('GET with an invalid article_id parameter returns 404 and error message', () => {
+      return request(app)
+        .get('/api/articles/999')
+        .expect(404)
+        .then(res => {
+          expect(res.body).to.eql({ msg: 'Article not found' });
+        });
+    });
+    it('PATCH returns returns a status 200 and the updated article object', () => {
+      return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_votes: 50 })
+        .expect(200)
+        .then(res => {
+          expect(res.body).to.eql({
+            author: 'butter_bridge',
+            title: 'Living in the shadow of a great man',
+            article_id: 1,
+            body: 'I find this existence challenging',
+            topic: 'mitch',
+            created_at: '2018-11-15T12:21:54.171Z',
+            votes: 150,
+            comment_count: '13'
+          });
+        });
+    });
   });
 });
