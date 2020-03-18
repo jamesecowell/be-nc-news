@@ -73,7 +73,7 @@ describe('/api', () => {
           expect(res.body).to.eql({ msg: 'Article not found' });
         });
     });
-    it('PATCH returns returns a status 200 and the updated article object', () => {
+    it('PATCH returns a status 200 and the updated article object', () => {
       return request(app)
         .patch('/api/articles/1')
         .send({ inc_votes: 50 })
@@ -90,6 +90,35 @@ describe('/api', () => {
             comment_count: '13'
           });
         });
+    });
+    it('PATCH with invalid article_if returns 404 and error message', () => {
+      return request(app)
+        .patch('/api/articles/999')
+        .send({ inc_votes: 50 })
+        .expect(404)
+        .then(res => {
+          expect(res.body).to.eql({ msg: 'Article not found' });
+        });
+    });
+    describe('/comments', () => {
+      it('POST returns status 201 and the posted comment', () => {
+        return request(app)
+          .post('/api/articles/1/comments')
+          .send({
+            username: 'snooty-snooterson',
+            body: 'I find this article highly purile and derivative...'
+          })
+          .expect(201)
+          .then(res => {
+            expect(res.body).to.eql({
+              body: 'I find this article highly purile and derivative...',
+              belongs_to: 'Living in the shadow of a great man',
+              created_by: 'snooty-snooterson',
+              votes: 0,
+              created_at: Date.now()
+            });
+          });
+      });
     });
   });
 });
