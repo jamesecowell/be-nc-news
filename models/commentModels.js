@@ -4,11 +4,11 @@ exports.addComment = (article, comment) => {
   let parsedId = parseInt(article.article_id);
   return knex('comments')
     .where('article_id', article.article_id)
-    .insert(
-      { article_id: parsedId },
-      { author: comment.username },
-      { body: comment.body }
-    )
+    .insert({
+      article_id: parsedId,
+      author: comment.username,
+      body: comment.body
+    })
     .returning('*');
 };
 

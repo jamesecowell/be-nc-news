@@ -108,14 +108,6 @@ describe('/api', () => {
           expect(res.body.length).to.equal(11);
         });
     });
-    xit('GET with an invalid query returns status 400', () => {
-      return request(app)
-        .get('/api/articles?query=not_a_query')
-        .expect(400)
-        .then(res => {
-          expect(res.body).to.eql({ msg: 'Bad request' });
-        });
-    });
     describe('/:article_id', () => {
       it('GET with an article_id paramter returns 200 and the requested article', () => {
         return request(app)
@@ -191,17 +183,17 @@ describe('/api', () => {
           return request(app)
             .post('/api/articles/1/comments')
             .send({
-              username: 'snooty-snooterson',
+              username: 'butter_bridge',
               body: 'I find this article highly purile and derivative...'
             })
             .expect(201)
             .then(res => {
               expect(res.body).to.eql({
                 article_id: 1,
-                author: 'snooty-snooterson',
+                author: 'butter_bridge',
                 body: 'I find this article highly purile and derivative...',
-                comment_id: '',
-                created_at: Date.now(),
+                comment_id: 19,
+                created_at: new Date(),
                 votes: 0
               });
             });
@@ -221,14 +213,6 @@ describe('/api', () => {
             .expect(404)
             .then(res => {
               expect(res.body).to.eql({ msg: 'Article not found' });
-            });
-        });
-        xit('GET with invalid article_id returns status 400 and error message', () => {
-          return request(app)
-            .get('api/articles/not_an_article/comments')
-            .expect(400)
-            .then(res => {
-              expect(res.body).to.eql({ msg: 'Bad request' });
             });
         });
         it('GET returns comments with all expected properties', () => {
