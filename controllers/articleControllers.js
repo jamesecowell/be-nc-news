@@ -1,14 +1,24 @@
-const { selectArticles, amendArticle } = require('../models/articleModels');
+const {
+  selectArticleById,
+  amendArticle,
+  selectArticles
+} = require('../models/articleModels');
 const { addComment, getComments } = require('../models/commentModels');
 
-exports.getArticles = (req, res, next) => {
-  selectArticles(req.params)
+exports.getArticleById = (req, res, next) => {
+  selectArticleById(req.params)
     .then(article => {
       res.status(200).send(article[0]);
     })
     .catch(err => {
       next(err);
     });
+};
+
+exports.getArticles = (req, res, next) => {
+  selectArticles(req.query).then(articles => {
+    res.status(200).send(articles);
+  });
 };
 
 exports.patchArticles = (req, res, next) => {
@@ -28,7 +38,7 @@ exports.postArticleComment = (req, res, next) => {
 };
 
 exports.getArticleComments = (req, res, next) => {
-  getComments(req.params).then(comments => {
+  getComments(req.params, req.query).then(comments => {
     res.status(200).send(comments);
   });
 };
