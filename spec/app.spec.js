@@ -193,7 +193,7 @@ describe('/api', () => {
                 author: 'butter_bridge',
                 body: 'I find this article highly purile and derivative...',
                 comment_id: 19,
-                created_at: new Date(),
+                created_at: res.body.created_at,
                 votes: 0
               });
             });
