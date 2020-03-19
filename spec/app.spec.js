@@ -100,8 +100,8 @@ describe('/api', () => {
           expect(res.body).to.eql({ msg: 'Article not found' });
         });
     });
-    describe('/comments', () => {
-      it('POST returns status 201 and the posted comment', () => {
+    describe.only('/comments', () => {
+      xit('POST returns status 201 and the posted comment', () => {
         return request(app)
           .post('/api/articles/1/comments')
           .send({
@@ -111,11 +111,37 @@ describe('/api', () => {
           .expect(201)
           .then(res => {
             expect(res.body).to.eql({
+              article_id: 1,
+              author: 'snooty-snooterson',
               body: 'I find this article highly purile and derivative...',
-              belongs_to: 'Living in the shadow of a great man',
-              created_by: 'snooty-snooterson',
-              votes: 0,
-              created_at: Date.now()
+              comment_id: '',
+              created_at: Date.now(),
+              votes: 0
+            });
+          });
+      });
+      it('GET returns status 200 and an array of comments for the given article_id', () => {
+        return request(app)
+          .get('/api/articles/1/comments')
+          .expect(200)
+          .then(res => {
+            expect(res.body).to.be.an('array');
+            expect(res.body.length).to.equal(13);
+          });
+      });
+      it('GET returns comments with all expected properties', () => {
+        return request(app)
+          .get('/api/articles/1/comments')
+          .expect(200)
+          .then(res => {
+            expect(res.body[0]).to.eql({
+              article_id: 1,
+              comment_id: 2,
+              votes: 14,
+              created_at: '2016-11-22T12:36:03.389Z',
+              author: 'butter_bridge',
+              body:
+                'The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.'
             });
           });
       });

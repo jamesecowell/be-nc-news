@@ -1,4 +1,5 @@
 const { selectArticles, amendArticle } = require('../models/articleModels');
+const { addComment, getComments } = require('../models/commentModels');
 
 exports.getArticles = (req, res, next) => {
   selectArticles(req.params)
@@ -18,4 +19,16 @@ exports.patchArticles = (req, res, next) => {
     .catch(err => {
       next(err);
     });
+};
+
+exports.postArticleComment = (req, res, next) => {
+  addComment(req.params, req.body).then(newComment => {
+    res.status(201).send(newComment[0]);
+  });
+};
+
+exports.getArticleComments = (req, res, next) => {
+  getComments(req.params).then(comments => {
+    res.status(200).send(comments);
+  });
 };
