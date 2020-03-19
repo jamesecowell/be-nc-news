@@ -1,7 +1,6 @@
 const knex = require('../db/connection');
 
 exports.addComment = (article, comment) => {
-  console.log(comment.username);
   let parsedId = parseInt(article.article_id);
   return knex('comments')
     .where('article_id', article.article_id)
@@ -18,7 +17,41 @@ exports.getComments = (article, query) => {
     sort_by: query.sort_by || 'created_at',
     order: query.order || 'desc'
   };
+  if (article.article_id !== NaN) {
+    return knex('comments')
+      .where('article_id', article.article_id)
+      .orderBy(queryObj.sort_by, queryObj.order)
+      .then(res => {
+        if (res.length !== 0) {
+          return res;
+        } else {
+          return Promise.reject('noArticle');
+        }
+      });
+  } else {
+    return Promise.reject('badRequest');
+  }
+};
+
+exports.amendComment = (comment, patch) => {
   return knex('comments')
-    .where('article_id', article.article_id)
-    .orderBy(queryObj.sort_by, queryObj.order);
+    .where('comment_id', comment.comment_id)
+    .increment('votes', patch.inc_votes)
+    .returning('*')
+    .then(res => {
+      if (res.length !== 0) {
+        return res;
+      } else {
+        return Promise.reject('noComment');
+      }
+    });
+};
+
+exports.removeComment = comment => {
+  return knex('comments')
+    .where('comment_id', comment.comment_id)
+    .del()
+    .then(result => {
+      return result;
+    });
 };

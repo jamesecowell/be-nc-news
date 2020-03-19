@@ -108,6 +108,14 @@ describe('/api', () => {
           expect(res.body.length).to.equal(11);
         });
     });
+    xit('GET with an invalid query returns status 400', () => {
+      return request(app)
+        .get('/api/articles?query=not_a_query')
+        .expect(400)
+        .then(res => {
+          expect(res.body).to.eql({ msg: 'Bad request' });
+        });
+    });
     describe('/:article_id', () => {
       it('GET with an article_id paramter returns 200 and the requested article', () => {
         return request(app)
@@ -126,12 +134,20 @@ describe('/api', () => {
             });
           });
       });
-      it('GET with an invalid article_id parameter returns 404 and error message', () => {
+      it('GET with a non-existant article_id parameter returns 404 and error message', () => {
         return request(app)
           .get('/api/articles/999')
           .expect(404)
           .then(res => {
             expect(res.body).to.eql({ msg: 'Article not found' });
+          });
+      });
+      it('GET with an invalid article_id parameter returns 400 and an error message', () => {
+        return request(app)
+          .get('/api/articles/not_an_article')
+          .expect(400)
+          .then(res => {
+            expect(res.body).to.eql({ msg: 'Bad request' });
           });
       });
       it('PATCH returns a status 200 and the updated article object', () => {
@@ -152,7 +168,7 @@ describe('/api', () => {
             });
           });
       });
-      it('PATCH with invalid article_if returns 404 and error message', () => {
+      it('PATCH with non-existant article_id returns 404 and error message', () => {
         return request(app)
           .patch('/api/articles/999')
           .send({ inc_votes: 50 })
@@ -161,8 +177,17 @@ describe('/api', () => {
             expect(res.body).to.eql({ msg: 'Article not found' });
           });
       });
+      it('PATCH with invalid article_id returns 400 and error message', () => {
+        return request(app)
+          .patch('/api/articles/not_an_article')
+          .send({ inc_votes: 50 })
+          .expect(400)
+          .then(res => {
+            expect(res.body).to.eql({ msg: 'Bad request' });
+          });
+      });
       describe('/comments', () => {
-        xit('POST returns status 201 and the posted comment', () => {
+        it('POST returns status 201 and the posted comment', () => {
           return request(app)
             .post('/api/articles/1/comments')
             .send({
@@ -188,6 +213,22 @@ describe('/api', () => {
             .then(res => {
               expect(res.body).to.be.an('array');
               expect(res.body.length).to.equal(13);
+            });
+        });
+        it('GET with non-existant article_id returns status 404 and error message', () => {
+          return request(app)
+            .get('/api/articles/999/comments')
+            .expect(404)
+            .then(res => {
+              expect(res.body).to.eql({ msg: 'Article not found' });
+            });
+        });
+        xit('GET with invalid article_id returns status 400 and error message', () => {
+          return request(app)
+            .get('api/articles/not_an_article/comments')
+            .expect(400)
+            .then(res => {
+              expect(res.body).to.eql({ msg: 'Bad request' });
             });
         });
         it('GET returns comments with all expected properties', () => {
@@ -241,13 +282,38 @@ describe('/api', () => {
               .then(res => {
                 expect(res.body).to.eql({
                   comment_id: 1,
-                  author: 'butter bridge',
+                  author: 'butter_bridge',
                   article_id: 9,
                   votes: 20,
-                  created_at: '2017-11-22 12:36:03.389',
+                  created_at: '2017-11-22T12:36:03.389Z',
                   body: `Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!`
                 });
               });
+          });
+          it('PATCH with a non-existant comment_id returns 404 and an error message', () => {
+            return request(app)
+              .patch('/api/comments/999')
+              .send({ inc_votes: 4 })
+              .expect(404)
+              .then(res => {
+                expect(res.body).to.eql({
+                  msg: 'Comment not found'
+                });
+              });
+          });
+          it('PATCH with an invalid comment_id returns 400 and an error message', () => {
+            return request(app)
+              .patch('/api/comments/not_a_comment')
+              .send({ inc_votes: 4 })
+              .expect(400)
+              .then(res => {
+                expect(res.body).to.eql({ msg: 'Bad request' });
+              });
+          });
+          it('DELETE returns status 204', () => {
+            return request(app)
+              .delete('/api/comments/1')
+              .expect(204);
           });
         });
       });

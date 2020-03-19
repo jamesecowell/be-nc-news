@@ -38,7 +38,11 @@ exports.postArticleComment = (req, res, next) => {
 };
 
 exports.getArticleComments = (req, res, next) => {
-  getComments(req.params, req.query).then(comments => {
-    res.status(200).send(comments);
-  });
+  getComments(req.params, req.query)
+    .then(comments => {
+      res.status(200).send(comments);
+    })
+    .catch(err => {
+      next(err);
+    });
 };
