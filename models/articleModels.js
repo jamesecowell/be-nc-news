@@ -44,6 +44,7 @@ exports.selectArticleById = reqArticle => {
 };
 
 exports.amendArticle = (reqArticle, reqBody) => {
+  const queryObj = { voteInc: reqBody.inc_votes || 0 };
   return knex
     .select('articles')
     .where('articles.article_id', reqArticle.article_id)
@@ -51,7 +52,7 @@ exports.amendArticle = (reqArticle, reqBody) => {
     .count({ comment_count: 'comments.article_id' })
     .leftJoin('comments', 'articles.article_id', 'comments.article_id')
     .groupBy('articles.article_id')
-    .increment('votes', reqBody.inc_votes)
+    .increment('votes', queryObj.voteInc)
     .returning('*')
     .then(result => {
       if (result.length !== 0) {
