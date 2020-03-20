@@ -8,7 +8,7 @@ const { addComment, getComments } = require('../models/commentModels');
 exports.getArticleById = (req, res, next) => {
   selectArticleById(req.params)
     .then(article => {
-      res.status(200).send(article[0]);
+      res.status(200).send({ article: article[0] });
     })
     .catch(err => {
       next(err);
@@ -24,7 +24,7 @@ exports.getArticles = (req, res, next) => {
 exports.patchArticles = (req, res, next) => {
   amendArticle(req.params, req.body)
     .then(patchedArticle => {
-      res.status(200).send(patchedArticle[0]);
+      res.status(200).send({ article: patchedArticle[0] });
     })
     .catch(err => {
       next(err);
