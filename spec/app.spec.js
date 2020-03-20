@@ -13,16 +13,46 @@ describe('/api', () => {
   beforeEach(() => knex.seed.run());
   after(() => knex.destroy());
 
+  it('Using invalid method at api endpoint returns 405 and error message', () => {
+    return request(app)
+      .delete('/api')
+      .expect(405)
+      .then(res => {
+        expect(res.body).to.eql({ msg: 'Method not allowed' });
+      });
+  });
+
   describe('/topics', () => {
     it('GET returns status 200 and topics', () => {
       return request(app)
         .get('/api/topics')
         .expect(200)
         .then(res => {
-          expect(res.body[0]).to.eql({
-            slug: 'mitch',
-            description: 'The man, the Mitch, the legend'
+          expect(res.body).to.eql({
+            topics: [
+              {
+                description: 'The man, the Mitch, the legend',
+                slug: 'mitch'
+              },
+              {
+                description: 'Not dogs',
+                slug: 'cats'
+              },
+              {
+                description: 'what books are made of',
+                slug: 'paper'
+              }
+            ]
           });
+        });
+    });
+    it('Using an invalid method returns status 405 and error message', () => {
+      return request(app)
+        .post('/api/topics')
+        .send({ not: 'allowed' })
+        .expect(405)
+        .then(res => {
+          expect(res.body).to.eql({ msg: 'Method not allowed' });
         });
     });
   });
@@ -34,10 +64,12 @@ describe('/api', () => {
         .expect(200)
         .then(res => {
           expect(res.body).to.eql({
-            username: 'butter_bridge',
-            avatar_url:
-              'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg',
-            name: 'jonny'
+            user: {
+              username: 'butter_bridge',
+              avatar_url:
+                'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg',
+              name: 'jonny'
+            }
           });
         });
     });
@@ -47,6 +79,14 @@ describe('/api', () => {
         .expect(404)
         .then(res => {
           expect(res.body).to.eql({ msg: 'User not found' });
+        });
+    });
+    it('Using invalid method returns 405 and error message', () => {
+      return request(app)
+        .put('/api/users/butter_bridge')
+        .expect(405)
+        .then(res => {
+          expect(res.body).to.eql({ msg: 'Method not allowed' });
         });
     });
   });
@@ -100,12 +140,36 @@ describe('/api', () => {
           expect(res.body.length).to.equal(3);
         });
     });
+    it('GET with author query returns an empty array when there are no articles by that author', () => {
+      return request(app)
+        .get('/api/articles?author=lurker')
+        .expect(200)
+        .then(res => {
+          expect(res.body).to.eql([]);
+        });
+    });
     it('GET with topic query sorts articles by topic', () => {
       return request(app)
         .get('/api/articles?topic=mitch')
         .expect(200)
         .then(res => {
           expect(res.body.length).to.equal(11);
+        });
+    });
+    it('GET with topic query returns an empty array when there are no articles for that topic', () => {
+      return request(app)
+        .get('/api/articles?topic=paper')
+        .expect(200)
+        .then(res => {
+          expect(res.body).to.eql([]);
+        });
+    });
+    it('Using invalid method returns 405 and error message', () => {
+      return request(app)
+        .post('/api/articles')
+        .expect(405)
+        .then(res => {
+          expect(res.body).to.eql({ msg: 'Method not allowed' });
         });
     });
     describe('/:article_id', () => {
@@ -115,14 +179,16 @@ describe('/api', () => {
           .expect(200)
           .then(res => {
             expect(res.body).to.eql({
-              author: 'butter_bridge',
-              title: 'Living in the shadow of a great man',
-              article_id: 1,
-              body: 'I find this existence challenging',
-              topic: 'mitch',
-              created_at: '2018-11-15T12:21:54.171Z',
-              votes: 100,
-              comment_count: '13'
+              article: {
+                author: 'butter_bridge',
+                title: 'Living in the shadow of a great man',
+                article_id: 1,
+                body: 'I find this existence challenging',
+                topic: 'mitch',
+                created_at: '2018-11-15T12:21:54.171Z',
+                votes: 100,
+                comment_count: '13'
+              }
             });
           });
       });
@@ -149,14 +215,16 @@ describe('/api', () => {
           .expect(200)
           .then(res => {
             expect(res.body).to.eql({
-              author: 'butter_bridge',
-              title: 'Living in the shadow of a great man',
-              article_id: 1,
-              body: 'I find this existence challenging',
-              topic: 'mitch',
-              created_at: '2018-11-15T12:21:54.171Z',
-              votes: 150,
-              comment_count: '13'
+              article: {
+                author: 'butter_bridge',
+                title: 'Living in the shadow of a great man',
+                article_id: 1,
+                body: 'I find this existence challenging',
+                topic: 'mitch',
+                created_at: '2018-11-15T12:21:54.171Z',
+                votes: 150,
+                comment_count: '13'
+              }
             });
           });
       });
@@ -178,6 +246,14 @@ describe('/api', () => {
             expect(res.body).to.eql({ msg: 'Bad request' });
           });
       });
+      it('Using invalid method returns 405 and error message', () => {
+        return request(app)
+          .put('/api/articles/1')
+          .expect(405)
+          .then(res => {
+            expect(res.body).to.eql({ msg: 'Method not allowed' });
+          });
+      });
       describe('/comments', () => {
         it('POST returns status 201 and the posted comment', () => {
           return request(app)
@@ -189,12 +265,14 @@ describe('/api', () => {
             .expect(201)
             .then(res => {
               expect(res.body).to.eql({
-                article_id: 1,
-                author: 'butter_bridge',
-                body: 'I find this article highly purile and derivative...',
-                comment_id: 19,
-                created_at: res.body.created_at,
-                votes: 0
+                comment: {
+                  article_id: 1,
+                  author: 'butter_bridge',
+                  body: 'I find this article highly purile and derivative...',
+                  comment_id: 19,
+                  created_at: res.body.comment.created_at,
+                  votes: 0
+                }
               });
             });
         });
@@ -257,20 +335,30 @@ describe('/api', () => {
               expect(res.body).to.be.sortedBy('created_at');
             });
         });
+        it('GET returns empty array when article exists but has no comments', () => {
+          return request(app)
+            .get('/api/articles/2/comments')
+            .expect(200)
+            .then(res => {
+              expect(res.body).to.eql([]);
+            });
+        });
         describe('/:comment_id', () => {
           it('PATCH returns status 200 and the updated comment object', () => {
             return request(app)
               .patch('/api/comments/1')
               .send({ inc_votes: 4 })
-              .expect(201)
+              .expect(200)
               .then(res => {
                 expect(res.body).to.eql({
-                  comment_id: 1,
-                  author: 'butter_bridge',
-                  article_id: 9,
-                  votes: 20,
-                  created_at: '2017-11-22T12:36:03.389Z',
-                  body: `Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!`
+                  comment: {
+                    comment_id: 1,
+                    author: 'butter_bridge',
+                    article_id: 9,
+                    votes: 20,
+                    created_at: '2017-11-22T12:36:03.389Z',
+                    body: `Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!`
+                  }
                 });
               });
           });
@@ -298,6 +386,22 @@ describe('/api', () => {
             return request(app)
               .delete('/api/comments/1')
               .expect(204);
+          });
+          it('DELETE with non-existant comment_id returns 404 and error message', () => {
+            return request(app)
+              .delete('/api/comments/999')
+              .expect(404)
+              .then(res => {
+                expect(res.body).to.eql({ msg: 'Comment not found' });
+              });
+          });
+          it('Using an invalid method returns 405 and an error message', () => {
+            return request(app)
+              .put('/api/comments/1')
+              .expect(405)
+              .then(res => {
+                expect(res.body).to.eql({ msg: 'Method not allowed' });
+              });
           });
         });
       });

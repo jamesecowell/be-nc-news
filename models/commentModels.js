@@ -50,8 +50,16 @@ exports.amendComment = (comment, patch) => {
 exports.removeComment = comment => {
   return knex('comments')
     .where('comment_id', comment.comment_id)
-    .del()
     .then(result => {
-      return result;
+      if (result.length !== 0) {
+        return knex('comments')
+          .where('comment_id', comment.comment_id)
+          .del()
+          .then(res => {
+            return res;
+          });
+      } else {
+        return Promise.reject('noComment');
+      }
     });
 };

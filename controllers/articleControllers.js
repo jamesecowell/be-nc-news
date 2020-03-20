@@ -33,7 +33,7 @@ exports.patchArticles = (req, res, next) => {
 
 exports.postArticleComment = (req, res, next) => {
   addComment(req.params, req.body).then(newComment => {
-    res.status(201).send(newComment[0]);
+    res.status(201).send({ comment: newComment[0] });
   });
 };
 

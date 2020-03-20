@@ -3,6 +3,7 @@ exports.errors = (err, req, res, next) => {
     noUser: { status: 404, msg: 'User not found' },
     noArticle: { status: 404, msg: 'Article not found' },
     noComment: { status: 404, msg: 'Comment not found' },
+    badMethod: { status: 405, msg: 'Method not allowed' },
     badRequest: { status: 400, msg: 'Bad request' }
   };
   const psqlCodes = ['22P02'];
@@ -14,4 +15,8 @@ exports.errors = (err, req, res, next) => {
     console.log(err);
     res.status(500).send('Internal error');
   }
+};
+
+exports.send405Error = (req, res, next) => {
+  res.status(405).send({ msg: 'Method not allowed' });
 };
