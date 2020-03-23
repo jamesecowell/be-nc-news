@@ -1,4 +1,5 @@
 const knex = require('../db/connection');
+const { selectTopics, selectTopicBySlug } = require('./topicModels');
 
 exports.selectArticles = query => {
   let queryObj = {
@@ -22,6 +23,27 @@ exports.selectArticles = query => {
     .modify(queryBuild => {
       if (queryObj.topic !== undefined) {
         queryBuild.where('articles.topic', '=', queryObj.topic);
+      }
+    })
+    .then(articles => {
+      if (articles.length !== 0) {
+        return articles;
+      } else if (queryObj.topic !== undefined) {
+        return knex('topics')
+          .where('slug', queryObj.topic)
+          .then(topic => {
+            if (topic.length === 0) {
+              return Promise.reject('noTopic');
+            } else return [];
+          });
+      } else if (queryObj.author !== undefined) {
+        return knex('users')
+          .where('username', queryObj.author)
+          .then(author => {
+            if (author.length === 0) {
+              return Promise.reject('noAuthor');
+            } else return [];
+          });
       }
     });
 };

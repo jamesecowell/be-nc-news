@@ -3,6 +3,8 @@ exports.errors = (err, req, res, next) => {
     noUser: { status: 404, msg: 'User not found' },
     noArticle: { status: 404, msg: 'Article not found' },
     noComment: { status: 404, msg: 'Comment not found' },
+    noTopic: { status: 404, msg: 'Topic not found' },
+    noAuthor: { status: 404, msg: 'Author not found' },
     badMethod: { status: 405, msg: 'Method not allowed' },
     badRequest: { status: 400, msg: 'Bad request' }
   };

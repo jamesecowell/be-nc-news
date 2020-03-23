@@ -16,9 +16,13 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  selectArticles(req.query).then(articles => {
-    res.status(200).send(articles);
-  });
+  selectArticles(req.query)
+    .then(articles => {
+      res.status(200).send({ articles: articles });
+    })
+    .catch(err => {
+      next(err);
+    });
 };
 
 exports.patchArticles = (req, res, next) => {
@@ -40,7 +44,7 @@ exports.postArticleComment = (req, res, next) => {
 exports.getArticleComments = (req, res, next) => {
   getComments(req.params, req.query)
     .then(comments => {
-      res.status(200).send(comments);
+      res.status(200).send({ comments: comments });
     })
     .catch(err => {
       next(err);

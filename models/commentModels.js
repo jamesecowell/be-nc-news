@@ -1,4 +1,5 @@
 const knex = require('../db/connection');
+const { selectArticleById } = require('./articleModels');
 
 exports.addComment = (article, comment) => {
   let parsedId = parseInt(article.article_id);
@@ -13,6 +14,13 @@ exports.addComment = (article, comment) => {
 };
 
 exports.getComments = (article, query) => {
+  /**
+   * first try and get the comments
+   * then if there are no comments check to see if the article exists
+   * if the article exists send empty array
+   * else send 404 article not found
+   */
+
   const queryObj = {
     sort_by: query.sort_by || 'created_at',
     order: query.order || 'desc'
@@ -25,7 +33,15 @@ exports.getComments = (article, query) => {
         if (res.length !== 0) {
           return res;
         } else {
-          return Promise.reject('noArticle');
+          return knex('articles')
+            .where('article_id', article.article_id)
+            .then(artRes => {
+              if (artRes.length !== 0) {
+                return [];
+              } else {
+                return Promise.reject('noArticle');
+              }
+            });
         }
       });
   } else {

@@ -97,7 +97,7 @@ describe('/api', () => {
         .get('/api/articles')
         .expect(200)
         .then(res => {
-          expect(res.body).to.be.an('array');
+          expect(res.body.articles).to.be.an('array');
         });
     });
     it('Array of articles include a comment count', () => {
@@ -105,7 +105,7 @@ describe('/api', () => {
         .get('/api/articles')
         .expect(200)
         .then(res => {
-          expect(res.body[0]).to.haveOwnProperty('comment_count');
+          expect(res.body.articles[0]).to.haveOwnProperty('comment_count');
         });
     });
     it('GET with sort_by query sorts the articles by column', () => {
@@ -113,7 +113,9 @@ describe('/api', () => {
         .get('/api/articles?sort_by=article_id')
         .expect(200)
         .then(res => {
-          expect(res.body).to.be.sortedBy('article_id', { descending: true });
+          expect(res.body.articles).to.be.sortedBy('article_id', {
+            descending: true
+          });
         });
     });
     it('sort_by query defaults to date', () => {
@@ -121,7 +123,9 @@ describe('/api', () => {
         .get('/api/articles')
         .expect(200)
         .then(res => {
-          expect(res.body).to.be.sortedBy('created_at', { descending: true });
+          expect(res.body.articles).to.be.sortedBy('created_at', {
+            descending: true
+          });
         });
     });
     it('GET with order query changes order of columns', () => {
@@ -129,7 +133,7 @@ describe('/api', () => {
         .get('/api/articles?order=asc')
         .expect(200)
         .then(res => {
-          expect(res.body).to.be.sortedBy('created_at');
+          expect(res.body.articles).to.be.sortedBy('created_at');
         });
     });
     it('GET with author query sorts articles by author', () => {
@@ -137,7 +141,7 @@ describe('/api', () => {
         .get('/api/articles?author=rogersop')
         .expect(200)
         .then(res => {
-          expect(res.body.length).to.equal(3);
+          expect(res.body.articles.length).to.equal(3);
         });
     });
     it('GET with author query returns an empty array when there are no articles by that author', () => {
@@ -145,7 +149,7 @@ describe('/api', () => {
         .get('/api/articles?author=lurker')
         .expect(200)
         .then(res => {
-          expect(res.body).to.eql([]);
+          expect(res.body.articles).to.eql([]);
         });
     });
     it('GET with topic query sorts articles by topic', () => {
@@ -153,7 +157,7 @@ describe('/api', () => {
         .get('/api/articles?topic=mitch')
         .expect(200)
         .then(res => {
-          expect(res.body.length).to.equal(11);
+          expect(res.body.articles.length).to.equal(11);
         });
     });
     it('GET with topic query returns an empty array when there are no articles for that topic', () => {
@@ -161,7 +165,23 @@ describe('/api', () => {
         .get('/api/articles?topic=paper')
         .expect(200)
         .then(res => {
-          expect(res.body).to.eql([]);
+          expect(res.body.articles).to.eql([]);
+        });
+    });
+    it('GET with non-existant topic query returns 404 and error message', () => {
+      return request(app)
+        .get('/api/articles?topic=not-a-topic')
+        .expect(404)
+        .then(res => {
+          expect(res.body).to.eql({ msg: 'Topic not found' });
+        });
+    });
+    it('GET with non-existant author query returns 404 and error message', () => {
+      return request(app)
+        .get('/api/articles?author=not-an-author')
+        .expect(404)
+        .then(res => {
+          expect(res.body).to.eql({ msg: 'Author not found' });
         });
     });
     it('Using invalid method returns 405 and error message', () => {
@@ -301,8 +321,8 @@ describe('/api', () => {
             .get('/api/articles/1/comments')
             .expect(200)
             .then(res => {
-              expect(res.body).to.be.an('array');
-              expect(res.body.length).to.equal(13);
+              expect(res.body.comments).to.be.an('array');
+              expect(res.body.comments.length).to.equal(13);
             });
         });
         it('GET with non-existant article_id returns status 404 and error message', () => {
@@ -318,7 +338,7 @@ describe('/api', () => {
             .get('/api/articles/1/comments')
             .expect(200)
             .then(res => {
-              expect(res.body[0]).to.eql({
+              expect(res.body.comments[0]).to.eql({
                 article_id: 1,
                 comment_id: 2,
                 votes: 14,
@@ -334,7 +354,7 @@ describe('/api', () => {
             .get('/api/articles/1/comments')
             .expect(200)
             .then(res => {
-              expect(res.body).to.be.sortedBy('created_at', {
+              expect(res.body.comments).to.be.sortedBy('created_at', {
                 descending: true
               });
             });
@@ -344,7 +364,9 @@ describe('/api', () => {
             .get('/api/articles/1/comments?sort_by=author')
             .expect(200)
             .then(res => {
-              expect(res.body).to.be.sortedBy('author', { descending: true });
+              expect(res.body.comments).to.be.sortedBy('author', {
+                descending: true
+              });
             });
         });
         it('GET with order query returns comments in that order', () => {
@@ -352,15 +374,15 @@ describe('/api', () => {
             .get('/api/articles/1/comments?order=asc')
             .expect(200)
             .then(res => {
-              expect(res.body).to.be.sortedBy('created_at');
+              expect(res.body.comments).to.be.sortedBy('created_at');
             });
         });
-        xit('GET returns empty array when article exists but has no comments', () => {
+        it('GET returns empty array when article exists but has no comments', () => {
           return request(app)
             .get('/api/articles/2/comments')
             .expect(200)
             .then(res => {
-              expect(res.body).to.eql([]);
+              expect(res.body.comments).to.eql([]);
             });
         });
         describe('/:comment_id', () => {
