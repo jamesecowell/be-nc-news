@@ -36,9 +36,13 @@ exports.patchArticles = (req, res, next) => {
 };
 
 exports.postArticleComment = (req, res, next) => {
-  addComment(req.params, req.body).then(newComment => {
-    res.status(201).send({ comment: newComment[0] });
-  });
+  addComment(req.params, req.body)
+    .then(newComment => {
+      res.status(201).send({ comment: newComment[0] });
+    })
+    .catch(err => {
+      next(err);
+    });
 };
 
 exports.getArticleComments = (req, res, next) => {

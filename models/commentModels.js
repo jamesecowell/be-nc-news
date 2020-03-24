@@ -14,13 +14,6 @@ exports.addComment = (article, comment) => {
 };
 
 exports.getComments = (article, query) => {
-  /**
-   * first try and get the comments
-   * then if there are no comments check to see if the article exists
-   * if the article exists send empty array
-   * else send 404 article not found
-   */
-
   const queryObj = {
     sort_by: query.sort_by || 'created_at',
     order: query.order || 'desc'
@@ -52,8 +45,12 @@ exports.getComments = (article, query) => {
 exports.amendComment = (comment, patch) => {
   return knex('comments')
     .where('comment_id', comment.comment_id)
-    .increment('votes', patch.inc_votes)
-    .returning('*')
+    .modify(queryBuild => {
+      if (patch.inc_votes !== undefined) {
+        queryBuild.increment('votes', patch.inc_votes);
+        queryBuild.returning('*');
+      }
+    })
     .then(res => {
       if (res.length !== 0) {
         return res;

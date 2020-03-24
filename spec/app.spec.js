@@ -13,6 +13,14 @@ describe('/api', () => {
   beforeEach(() => knex.seed.run());
   after(() => knex.destroy());
 
+  it('Non existant route at api endpoint returns 404 and error message', () => {
+    return request(app)
+      .get('/not-a-route')
+      .expect(404)
+      .then(res => {
+        expect(res.body).to.eql({ msg: 'Route not found' });
+      });
+  });
   it('Using invalid method at api endpoint returns 405 and error message', () => {
     return request(app)
       .delete('/api')
@@ -116,6 +124,14 @@ describe('/api', () => {
           expect(res.body.articles).to.be.sortedBy('article_id', {
             descending: true
           });
+        });
+    });
+    it('GET with invalid sort_by query returns 400 and an error message', () => {
+      return request(app)
+        .get('/api/articles?sort_by=not-a-column')
+        .expect(400)
+        .then(res => {
+          expect(res.body).to.eql({ msg: 'Bad request' });
         });
     });
     it('sort_by query defaults to date', () => {
@@ -316,6 +332,30 @@ describe('/api', () => {
               });
             });
         });
+        it('POST with non-existant article_id returns 400 and error message', () => {
+          return request(app)
+            .post('/api/articles/999/comments')
+            .send({
+              username: 'butter_bridge',
+              body: 'I find this article highly purile and derivative...'
+            })
+            .expect(400)
+            .then(res => {
+              expect(res.body).to.eql({ msg: 'Bad request' });
+            });
+        });
+        it('POST with invalid article_id returns 400 and error message', () => {
+          return request(app)
+            .post('/api/articles/not-a-valid-id/comments')
+            .send({
+              username: 'butter_bridge',
+              body: 'blalbalbalba'
+            })
+            .expect(400)
+            .then(res => {
+              expect(res.body).to.eql({ msg: 'Bad request' });
+            });
+        });
         it('GET returns status 200 and an array of comments for the given article_id', () => {
           return request(app)
             .get('/api/articles/1/comments')
@@ -369,6 +409,14 @@ describe('/api', () => {
               });
             });
         });
+        it('GET with invalid sort_by query returns 400 and an error message', () => {
+          return request(app)
+            .get('/api/articles/1/comments?sort_by=not-a-column')
+            .expect(400)
+            .then(res => {
+              expect(res.body).to.eql({ msg: 'Bad request' });
+            });
+        });
         it('GET with order query returns comments in that order', () => {
           return request(app)
             .get('/api/articles/1/comments?order=asc')
@@ -398,6 +446,24 @@ describe('/api', () => {
                     author: 'butter_bridge',
                     article_id: 9,
                     votes: 20,
+                    created_at: '2017-11-22T12:36:03.389Z',
+                    body: `Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!`
+                  }
+                });
+              });
+          });
+          it('PATCH with no body returns 400 and unchanged comment object', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .send({})
+              .expect(200)
+              .then(res => {
+                expect(res.body).to.eql({
+                  comment: {
+                    comment_id: 1,
+                    author: 'butter_bridge',
+                    article_id: 9,
+                    votes: 16,
                     created_at: '2017-11-22T12:36:03.389Z',
                     body: `Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!`
                   }

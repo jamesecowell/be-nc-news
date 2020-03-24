@@ -8,7 +8,7 @@ exports.errors = (err, req, res, next) => {
     badMethod: { status: 405, msg: 'Method not allowed' },
     badRequest: { status: 400, msg: 'Bad request' }
   };
-  const psqlCodes = ['22P02'];
+  const psqlCodes = ['22P02', '42703', '23503'];
   if (err in errors) {
     res.status(errors[err].status).send({ msg: errors[err].msg });
   } else if (psqlCodes.includes(err.code)) {
@@ -21,4 +21,8 @@ exports.errors = (err, req, res, next) => {
 
 exports.send405Error = (req, res, next) => {
   res.status(405).send({ msg: 'Method not allowed' });
+};
+
+exports.route404Error = (req, res, next) => {
+  res.status(404).send({ msg: 'Route not found' });
 };
