@@ -332,16 +332,16 @@ describe('/api', () => {
               });
             });
         });
-        it('POST with non-existant article_id returns 400 and error message', () => {
+        it('POST with non-existant article_id returns 404 and error message', () => {
           return request(app)
             .post('/api/articles/999/comments')
             .send({
               username: 'butter_bridge',
               body: 'I find this article highly purile and derivative...'
             })
-            .expect(400)
+            .expect(404)
             .then(res => {
-              expect(res.body).to.eql({ msg: 'Bad request' });
+              expect(res.body).to.eql({ msg: 'Article not found' });
             });
         });
         it('POST with invalid article_id returns 400 and error message', () => {
@@ -351,6 +351,15 @@ describe('/api', () => {
               username: 'butter_bridge',
               body: 'blalbalbalba'
             })
+            .expect(400)
+            .then(res => {
+              expect(res.body).to.eql({ msg: 'Bad request' });
+            });
+        });
+        it('POST without required keys returns 400 and error message', () => {
+          return request(app)
+            .post('/api/articles/1/comments')
+            .send({})
             .expect(400)
             .then(res => {
               expect(res.body).to.eql({ msg: 'Bad request' });

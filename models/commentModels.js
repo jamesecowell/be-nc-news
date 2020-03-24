@@ -5,12 +5,20 @@ exports.addComment = (article, comment) => {
   let parsedId = parseInt(article.article_id);
   return knex('comments')
     .where('article_id', article.article_id)
-    .insert({
-      article_id: parsedId,
-      author: comment.username,
-      body: comment.body
-    })
-    .returning('*');
+    .then(res => {
+      if (res.length !== 0) {
+        return knex('comments')
+          .where('article_id', article.article_id)
+          .insert({
+            article_id: parsedId,
+            author: comment.username,
+            body: comment.body
+          })
+          .returning('*');
+      } else {
+        return Promise.reject('noArticle');
+      }
+    });
 };
 
 exports.getComments = (article, query) => {
