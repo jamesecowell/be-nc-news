@@ -8,7 +8,9 @@ exports.errors = (err, req, res, next) => {
     badMethod: { status: 405, msg: 'Method not allowed' },
     badRequest: { status: 400, msg: 'Bad request' }
   };
+
   const psqlCodes = ['22P02', '42703', '23503', '23502'];
+
   if (err in errors) {
     res.status(errors[err].status).send({ msg: errors[err].msg });
   } else if (psqlCodes.includes(err.code)) {
